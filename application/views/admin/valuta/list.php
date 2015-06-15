@@ -23,7 +23,7 @@
 						<h5>Semua Valuta berjumlah sebanyak: <?php echo $count; ?> record(s).</h5><br />                                                                       	                                                                       
                        <!-- <a  style="float:right; margin:18px;width:auto" href="<?php echo base_url() ?>umum/setting/form/" class="dark_green btn cbKota">Tambah Data Kota</a>-->                                                 
                         <div class="well blue">                                                    
-							<div class="well-header">
+							<div class="well-header">                            
                                 <form class="inline" role="form" action="<?php echo base_url() ?>px/valuta/filter/" method="post">
                                     <div class="form-group">                
                                         <button type="submit" class="btn btn-info" style="float: right;" onclick="<?php echo base_url() ?>px/valuta/ap">Clear</button>                                                                                                                                                                                                                                                                    
@@ -34,7 +34,7 @@
                                 <h5 style="width:auto">List Daftar Valuta </h5><br/>	
 							</div>
 							<div class="well-content">
-							    <div class="table_options top_options"></div>                      
+							    <div class="table_options top_options"></div>                                                                                                       
     							<table class="table table-striped table-bordered"><!-- table default style -->
     								<thead>	
                                         <th>ID</th>
@@ -42,7 +42,7 @@
     									<th>Nama Valuta</th>	
                                         <th>Tukar</th>								
     									<th colspan="2"><!--<button type="submit" class="btn btn-primary" style="float: left;" onclick="#">Tambah</button>-->
-                                        <a title="Tambah Data Valuta" href="<?php echo base_url(); ?>px/valuta/new_/">
+                                        <a title="Tambah Data Valuta" href="<?php echo base_url(); ?>px/valuta/new_/<?php echo $this->uri->segment(3);?>">
     											<i class="icon-add"></i> Tambah Data Valuta
     										</a>
                                         </th>                                    
@@ -67,7 +67,7 @@
     								$no++;
     								} 
     							?>
-    							</table><!-- table default style -->
+    							</table><!-- table default style -->                                
     							<div class="pagination">
     								<ul>
     									<?php echo $this->pagination->create_links(); ?>

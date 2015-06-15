@@ -57,10 +57,16 @@
            }
            
            // Query Insert Divisi - masih salah
-           public function insert($module, $id, $ins, $tkr) {
+           public function insert($module, $id, $ins, $tkr, $stat) {
+              if ($stat == 'ap') {
                 if ($module == "pxapval") {
                     $query = $this->db->query("insert into pxapval(valid,description,tukar) values('$id','$ins','$tkr')");                                                     
                 }
+              } else {
+                if ($module == "pxarval") {
+                    $query = $this->db->query("insert into pxarval(valid,description,tukar) values('$id','$ins','$tkr')");                                                     
+                }
+              }
            }
            
            // Query GetEditKota

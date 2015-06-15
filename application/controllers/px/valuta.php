@@ -27,6 +27,7 @@
     }
     
     function ap() {
+        
         if($this->uri->segment(4) == "") {
             $offset = 0;
         } else {
@@ -40,7 +41,7 @@
         $data['count']   = $this->m_pxvaluta->getAllvalutaCount('ap');
        
         $config          = array();
-        $config['base_url']     = base_url(). 'px/valuta/list_';
+        $config['base_url']     = base_url(). 'px/valuta/ap';
         $config['per_page']     = $limit;
         $config['uri_segment']  = 4;
         $config['num_links']    = 5;
@@ -89,7 +90,7 @@
         $data['count']   = $this->m_pxvaluta->getAllvalutaCount('ar');
        
         $config          = array();
-        $config['base_url']     = base_url(). 'px/valuta/list_';
+        $config['base_url']     = base_url(). 'px/valuta/ar';
         $config['per_page']     = $limit;
         $config['uri_segment']  = 4;
         $config['num_links']    = 5;
@@ -183,7 +184,13 @@
     {
         if (!$this->tank_auth->is_logged_in()) {
             redirect('/auth/login/');
-        } else {            
+        } else {     
+            $stat =  $this->uri->segment(4);
+            if ($stat == 'ap')  {
+              $data['status'] = "ap";              
+            } else {
+              $data['status'] = "ar";              
+            }        
             $data['menu']       = $this->p_c_model->tampil_menu();            
             $this->load->view('template/admin/header', $data);
 		    $this->load->view('template/admin/nav');
@@ -206,29 +213,52 @@
             redirect('/auth/login/');
         } else {
             $st = $this->input->post('stts');
+            $status = $this->input->post('status');
+            // jika status = ap maka transaksi akan disimpan ditable pxapval
+            // dan jika status  = ar maka transaksi akan disimpan ditable pxarval
 			if($st=="edit")
 			{   
 			    $this->form_validation->set_rules('valid', 'valuta ID', 'required|xss_clean|max_length[5]|trim|strip_tags'); 
 				$this->form_validation->set_rules('description', 'Desription', 'required|xss_clean|max_length[50]|trim|strip_tags');
                 $this->form_validation->set_rules('tukar', 'tukar', 'trim|required|numeric|strip_tags');
-        		if($this->form_validation->run() == TRUE){            		   
-				   $this->m_pxvaluta->update("pxapval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'));
-        		   $this->session->set_flashdata('info', "List valuta berhasil dirubah.");
-        		   redirect('px/valuta/');
+        		if($this->form_validation->run() == TRUE){ 
+                   if ($status = 'ap') {          		   
+    				   $this->m_pxvaluta->update("pxapval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'));
+            		   $this->session->set_flashdata('info', "List valuta berhasil dirubah.");
+            		   redirect('px/valuta/ap');
+                   } else {
+                       $this->m_pxvaluta->update("pxarval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'));
+                       $this->session->set_flashdata('info', "List valuta berhasil dirubah.");
+                       redirect('px/valuta/ar');
+                   }
         		}  
-                redirect('px/valuta/');		 
+                if ($status = 'ap') {
+                   redirect('px/valuta/ap');		 
+                } else {
+                   redirect('px/valuta/ar');      
+                }
 			} else if($st=="tambah")
 	        {
 	            $this->form_validation->set_rules('valid', 'valuta ID', 'required|xss_clean|max_length[5]|trim|strip_tags');   
 				$this->form_validation->set_rules('description', 'description', 'required|xss_clean|max_length[50]|trim|strip_tags');
                 $this->form_validation->set_rules('tukar', 'tukar', 'trim|required|numeric|strip_tags');
         		if($this->form_validation->run() == TRUE){
-        		   $this->m_pxvaluta->insert("pxapval",$this->input->post('valid'),$this->input->post('description'), $this->input->post('tukar'));
-        		   $this->session->set_flashdata('info', "List valuta berhasil ditambahkan.");
-        		   redirect('px/valuta/');
+                   if ($status =='ap') {
+            		   $this->m_pxvaluta->insert("pxapval",$this->input->post('valid'),$this->input->post('description'), $this->input->post('tukar'));
+            		   $this->session->set_flashdata('info', "List valuta berhasil ditambahkan.");
+            		   redirect('px/valuta/ap');
+                   } else {
+                       $this->m_pxvaluta->insert("pxarval",$this->input->post('valid'),$this->input->post('description'), $this->input->post('tukar'));
+                       $this->session->set_flashdata('info', "List valuta berhasil ditambahkan.");
+                       redirect('px/valuta/ar');
+                   }
         		}                  
                 $this->session->set_flashdata('info', "nilai tukar for numeric values.");                                
-                redirect('px/valuta/');  		 
+                if ($status = 'ap') {
+                   redirect('px/valuta/ap');         
+                } else {
+                   redirect('px/valuta/ar');      
+                }
             }    			
         }    
     } 
