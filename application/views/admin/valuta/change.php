@@ -48,6 +48,7 @@
                                             </tr>
                             			</table>
                             			<input type="hidden" name="stts" value="<?php echo $stts; ?>">
+                                        <input type="hidden" name="status" value="<?php echo $status; ?>">
                             		<?php echo form_close(); ?>
                         		</div>
                             </div>

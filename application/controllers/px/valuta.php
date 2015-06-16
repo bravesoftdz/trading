@@ -38,9 +38,9 @@
         
         $limit = 5;
         $data['valuta']    = $this->m_pxvaluta->getAllvaluta($offset, $limit, 'ap');
-        $data['count']   = $this->m_pxvaluta->getAllvalutaCount('ap');
+        $data['count']     = $this->m_pxvaluta->getAllvalutaCount('ap');
        
-        $config          = array();
+        $config            = array();
         $config['base_url']     = base_url(). 'px/valuta/ap';
         $config['per_page']     = $limit;
         $config['uri_segment']  = 4;
@@ -264,10 +264,17 @@
     } 
     
     function change($id){
-		$data['change_valuta'] = $this->m_pxvaluta->getEditvaluta($id)->row();
+        $stat =  $this->uri->segment(4);
+		$data['change_valuta'] = $this->m_pxvaluta->getEditvaluta($id,$stat)->row();
 		$data['judul'] = "Edit Daftar valuta | Administrator";
         $data['menu']       = $this->p_c_model->tampil_menu();
         $data['stts'] = "edit";
+        
+        if ($stat == 'ap')  {
+          $data['status'] = "ap";              
+        } else {
+          $data['status'] = "ar";              
+        }  
 		$this->load->view('template/admin/header', $data);
 	    $this->load->view('template/admin/nav');
         $this->load->view('template/admin/sidebar', $data);
@@ -277,9 +284,18 @@
     }
     
     function delete($id){
-		$hapus = $this->m_pxvaluta->hapus("pxapval",$id);    		    		
+        $stat =  $this->uri->segment(4);
+        if ($stat == 'ap')  {
+           $hapus = $this->m_pxvaluta->hapus("pxapval",$id);                       
+        } else {
+          $hapus = $this->m_pxvaluta->hapus("pxarval",$id);                     
+        }  		
 		$this->session->set_flashdata('info', "Nama valuta berhasil dihapus.");
-		redirect('px/valuta/');
+		if ($status = 'ap') {
+           redirect('px/valuta/ap');         
+        } else {
+           redirect('px/valuta/ar');      
+        }
 		
 	} 
  }
