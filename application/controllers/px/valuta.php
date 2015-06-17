@@ -22,7 +22,11 @@
         if (!$this->tank_auth->is_logged_in()) {
             redirect('/auth/login');
         } else {
-            redirect('px/valuta/list_');   
+            if($this->uri->segment(3) == "ap") {
+                redirect('px/valuta/ap');   
+            } else {
+                redirect('px/valuta/ar');   
+            }
         }
     }
     
@@ -126,6 +130,7 @@
     }
 
     function filter(){
+        $stat = $this->input->post('status');        
         if($this->uri->segment(4) == "") {
             $offset = 0;
         } else {
@@ -138,14 +143,24 @@
         //
         $limit = 5;           
         if (!$keyword == "") {
-            $data['valuta']    = $this->m_pxvaluta->getvaluta($keyword, $offset, $limit);
-            $data['count']   = $this->m_pxvaluta->getCountvaluta($keyword);
+            $data['valuta']    = $this->m_pxvaluta->getvaluta($keyword, $offset, $limit, $stat);
+            $data['count']   = $this->m_pxvaluta->getCountvaluta($keyword, $stat);
         } else {
-            redirect('px/valuta/list_');
+            if ($stat == 'ap') {
+              redirect('px/valuta/ap');
+            } else {
+              redirect('px/valuta/ar'); 
+            }
+            // redirect('px/valuta/list_');
         }                            
        
         $config          = array();
-        $config['base_url']     = base_url(). 'px/valuta/filter/';
+        if ($stat == 'ap') {
+          $config['base_url']     = base_url(). 'px/valuta/filter/ap';
+        } else {
+          $config['base_url']     = base_url(). 'px/valuta/filter/ar';
+        }  
+        
         $config['per_page']     = $limit;
         $config['uri_segment']  = 4;
         $config['num_links']    = 5;
@@ -175,8 +190,12 @@
         $this->load->view('template/admin/header', $data);
 		$this->load->view('template/admin/nav');
         //$this->load->view('template/admin/home', $data);| jika digunakan maka akan double menunya
-        //$this->load->view('template/admin/sidebar', $data); 
-        $this->load->view('admin/valuta/filter', $data);                		
+        //$this->load->view('template/admin/sidebar', $data);
+        if ($stat == 'ap') {
+          $this->load->view('admin/valuta/filter/ap', $data);                      
+        } else {
+          $this->load->view('admin/valuta/filter/ar', $data);                        
+        }          
 		$this->load->view('template/admin/footer');
     }
     
@@ -212,27 +231,27 @@
         if (!$this->tank_auth->is_logged_in()) {
             redirect('/auth/login/');
         } else {
-            $st = $this->input->post('stts');
-            $status = $this->input->post('status');
+            $st = $this->input->post('stts');            
+            $status = $this->input->post('status');            
             // jika status = ap maka transaksi akan disimpan ditable pxapval
             // dan jika status  = ar maka transaksi akan disimpan ditable pxarval
 			if($st=="edit")
 			{   
 			    $this->form_validation->set_rules('valid', 'valuta ID', 'required|xss_clean|max_length[5]|trim|strip_tags'); 
 				$this->form_validation->set_rules('description', 'Desription', 'required|xss_clean|max_length[50]|trim|strip_tags');
-                $this->form_validation->set_rules('tukar', 'tukar', 'trim|required|numeric|strip_tags');
-        		if($this->form_validation->run() == TRUE){ 
-                   if ($status = 'ap') {          		   
-    				   $this->m_pxvaluta->update("pxapval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'));
+               // $this->form_validation->set_rules('tukar', 'tukar', 'trim|required|numeric|strip_tags');
+        		if($this->form_validation->run() == TRUE){                     
+                   if ($status == 'ap') {          	                 
+    				   $this->m_pxvaluta->update("pxapval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'),'ap');
             		   $this->session->set_flashdata('info', "List valuta berhasil dirubah.");
             		   redirect('px/valuta/ap');
-                   } else {
-                       $this->m_pxvaluta->update("pxarval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'));
+                   } else {                    
+                       $this->m_pxvaluta->update("pxarval",$this->input->post('description'),$this->input->post('valid'), $this->input->post('tukar'),'ar');
                        $this->session->set_flashdata('info', "List valuta berhasil dirubah.");
                        redirect('px/valuta/ar');
                    }
         		}  
-                if ($status = 'ap') {
+                if ($status == 'ap') {
                    redirect('px/valuta/ap');		 
                 } else {
                    redirect('px/valuta/ar');      
@@ -263,8 +282,9 @@
         }    
     } 
     
-    function change($id){
-        $stat =  $this->uri->segment(4);
+    function change($stat){
+        $id =  $this->uri->segment(5);
+        //$stat =  $this->uri->segment(4);
 		$data['change_valuta'] = $this->m_pxvaluta->getEditvaluta($id,$stat)->row();
 		$data['judul'] = "Edit Daftar valuta | Administrator";
         $data['menu']       = $this->p_c_model->tampil_menu();
@@ -283,15 +303,15 @@
 		$this->load->view('template/admin/footer');
     }
     
-    function delete($id){
-        $stat =  $this->uri->segment(4);
+    function delete($stat){
+         $id =  $this->uri->segment(5);
         if ($stat == 'ap')  {
-           $hapus = $this->m_pxvaluta->hapus("pxapval",$id);                       
+           $hapus = $this->m_pxvaluta->hapus("pxapval",$id, 'ap');                       
         } else {
-          $hapus = $this->m_pxvaluta->hapus("pxarval",$id);                     
+          $hapus = $this->m_pxvaluta->hapus("pxarval",$id, 'ar');                     
         }  		
 		$this->session->set_flashdata('info', "Nama valuta berhasil dihapus.");
-		if ($status = 'ap') {
+		if ($status == 'ap') {
            redirect('px/valuta/ap');         
         } else {
            redirect('px/valuta/ar');      
